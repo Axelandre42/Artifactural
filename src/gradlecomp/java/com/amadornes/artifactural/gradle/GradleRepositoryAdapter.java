@@ -49,10 +49,7 @@ import org.gradle.internal.action.InstantiatingAction;
 import org.gradle.internal.component.external.model.ModuleComponentResolveMetadata;
 import org.gradle.internal.component.external.model.ModuleDependencyMetadata;
 import org.gradle.internal.component.external.model.MutableModuleComponentResolveMetadata;
-import org.gradle.internal.component.model.ComponentArtifactMetadata;
-import org.gradle.internal.component.model.ComponentOverrideMetadata;
-import org.gradle.internal.component.model.ComponentResolveMetadata;
-import org.gradle.internal.component.model.ModuleSource;
+import org.gradle.internal.component.model.*;
 import org.gradle.internal.nativeintegration.filesystem.FileSystem;
 import org.gradle.internal.nativeintegration.services.FileSystems;
 import org.gradle.internal.resolve.result.BuildableArtifactResolveResult;
@@ -188,13 +185,13 @@ public class GradleRepositoryAdapter extends AbstractArtifactRepository implemen
                     }
 
                     @Override
-                    public void listModuleVersions(ModuleDependencyMetadata dependency, BuildableModuleVersionListingResolveResult result) {
-                        delegate.listModuleVersions(dependency, result);
+                    public void resolveArtifacts(ComponentResolveMetadata component, ConfigurationMetadata metadata, BuildableComponentArtifactsResolveResult result) {
+                        delegate.resolveArtifacts(component, metadata, result);
                     }
 
                     @Override
-                    public void resolveArtifacts(ComponentResolveMetadata component, BuildableComponentArtifactsResolveResult result) {
-                        delegate.resolveArtifacts(component, result);
+                    public void listModuleVersions(ModuleDependencyMetadata dependency, BuildableModuleVersionListingResolveResult result) {
+                        delegate.listModuleVersions(dependency, result);
                     }
 
                     @Override
@@ -203,8 +200,8 @@ public class GradleRepositoryAdapter extends AbstractArtifactRepository implemen
                     }
 
                     @Override
-                    public void resolveArtifact(ComponentArtifactMetadata artifact, ModuleSource moduleSource, BuildableArtifactResolveResult result) {
-                        delegate.resolveArtifact(artifact, moduleSource, result);
+                    public void resolveArtifact(ComponentArtifactMetadata componentArtifactMetadata, ModuleSources moduleSources, BuildableArtifactResolveResult buildableArtifactResolveResult) {
+
                     }
 
                     @Override

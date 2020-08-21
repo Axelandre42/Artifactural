@@ -9,10 +9,12 @@ buildscript {
 }
 
 plugins {
-  id 'net.minecrell.licenser' version '0.3'
-  id 'org.ajoberstar.grgit' version '2.3.0'
-  //id 'com.github.johnrengelman.shadow' version '2.0.4'
+    id 'net.minecrell.licenser' version '0.4.1'
+    id 'maven-publish'
+    id 'java'
 }
+
+evaluationDependsOn(':version')
 
 import java.nio.file.Paths
 import org.objectweb.asm.ClassReader
@@ -25,21 +27,7 @@ import org.objectweb.asm.tree.InsnNode
 
 import java.util.jar.JarFile
 
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'eclipse'
-
 group = 'net.minecraftforge'
-version = gitVersion()
-def gitVersion() {
-    def raw = grgit.describe(longDescr: true)
-    def desc = (raw == null ? 'unknown-unknown-unknown' : raw).split('-') as List
-    def hash = desc.remove(desc.size() - 1)
-    def offset = desc.remove(desc.size() - 1)
-    def tag = desc.join('-')
-    def branch = grgit.branch.current().name
-    return "${tag}.${offset}" //${t -> if (branch != 'master') t << '-' + branch}"
-}
 
 sourceSets {
     api
@@ -72,9 +60,9 @@ dependencies {
     gradlecompImplementation 'com.google.guava:guava:26.0-jre'
     gradlecompImplementation 'commons-io:commons-io:2.4'
 
-    compile sourceSets.api.output
-    compile sourceSets.shared.output
-    compile sourceSets.gradlecomp.output
+    implementation sourceSets.api.output
+    implementation sourceSets.shared.output
+    implementation sourceSets.gradlecomp.output
 }
 
 
@@ -85,9 +73,9 @@ tasks.withType(JavaCompile) {
     options.deprecation = true
     sourceCompatibility = 8
     targetCompatibility = 8
-    options.compilerArgs.addAll(['--release', '8'])
+    //options.compilerArgs.addAll(['--release', '8'])
 }
-
+/* TODO Java 9
 project(':artifactural9') {
     apply plugin: 'java'
     apply plugin: 'eclipse'
@@ -114,7 +102,7 @@ project(':artifactural9') {
         targetCompatibility = 9
         options.compilerArgs.addAll(['--release', '9'])
     }
-}
+}*/
 
 def gradleRepositoryAdapterPath = Paths.get("com", "amadornes", "artifactural", "gradle", "GradleRepositoryAdapter.class")
 def classesDirs = sourceSets.gradlecomp.output.classesDirs.getFiles().first().toPath()
@@ -217,10 +205,10 @@ jar {
     }
 
     from patchConstructor.outputs
-    
+    /* TODO Java 9
     into('META-INF/versions/9') {
         from project(':artifactural9').sourceSets.java9.output
-    }
+    }*/
     
     manifest {
         attributes(
@@ -262,7 +250,7 @@ jar.doLast {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    classifier 'sources'
     from sourceSets.api.allSource
     from sourceSets.shared.allSource
     from sourceSets.gradlecomp.allSource
@@ -275,9 +263,8 @@ license {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        java(MavenPublication) {
             from components.java
-            artifact tasks.sourcesJar
             pom {
                 groupId = project.group
                 version = project.version
@@ -308,20 +295,24 @@ publishing {
     }
     repositories {
         maven {
-            if (project.hasProperty('mavenPassword')) {
-                credentials {
-                    username = project.properties.mavenUser
-                    password = project.properties.mavenPassword
+            url = 'https://files.axelandre42.ovh/maven/'
+
+            if (System.env.MAVEN_USERNAME && System.env.MAVEN_PASSWORD) {
+                authentication {
+                    basic(BasicAuthentication)
                 }
-                url 'https://files.minecraftforge.net/maven/manage/upload'
-            } else {
-                url 'file://' + rootProject.file('repo').getAbsolutePath()
+
+                credentials {
+                    username = System.env.USERNAME
+                    password = System.env.PASSWORD
+                }
             }
         }
     }
 }
 
+/* TODO Java 9
 if (!JavaVersion.current().java9Compatible) {
     println("You must build this with JDK 9")
     System.exit(1)
-}
+}*/

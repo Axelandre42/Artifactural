@@ -1,2 +1,3 @@
 rootProject.name = 'artifactural'
-include 'artifactural9'
+//include 'artifactural9'
+include 'version'
